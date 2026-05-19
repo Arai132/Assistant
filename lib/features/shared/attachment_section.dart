@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/app_database.dart';
 import '../../providers/attachment_provider.dart';
 import '../../providers/database_provider.dart';
+import '../../services/voice_recorder_service.dart';
 
 class AttachmentSection extends ConsumerWidget {
   final String itemId;
@@ -52,18 +53,55 @@ class AttachmentSection extends ConsumerWidget {
   }
 }
 
-class _VoiceMemoTile extends StatelessWidget {
+class _VoiceMemoTile extends StatefulWidget {
   final Attachment attachment;
   const _VoiceMemoTile({required this.attachment});
 
   @override
+  State<_VoiceMemoTile> createState() => _VoiceMemoTileState();
+}
+
+class _VoiceMemoTileState extends State<_VoiceMemoTile> {
+  final VoiceRecorderService _svc = VoiceRecorderService();
+  bool _playing = false;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _svc.init().then((_) {
+      if (mounted) setState(() => _initialized = true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _svc.dispose();
+    super.dispose();
+  }
+
+  Future<void> _toggle() async {
+    if (_playing) {
+      await _svc.stopPlayback();
+    } else {
+      await _svc.playFile(widget.attachment.localPath);
+    }
+    if (mounted) setState(() => _playing = !_playing);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final name = attachment.localPath.split('/').last;
+    final name = widget.attachment.localPath.split('/').last;
     return ListTile(
       dense: true,
       leading: const Icon(Icons.mic),
       title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
-      trailing: const Icon(Icons.play_arrow),
+      trailing: _initialized
+          ? IconButton(
+              icon: Icon(_playing ? Icons.stop : Icons.play_arrow),
+              onPressed: _toggle,
+            )
+          : const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
     );
   }
 }
