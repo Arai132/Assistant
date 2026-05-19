@@ -14,10 +14,10 @@ void main() {
 
   test('insert and retrieve an item', () async {
     final id = await db.itemsDao.insertItem(
-      ItemsCompanion.insert(
-        title: 'Test item',
+      ItemsCompanion(
+        title: const Value('Test item'),
         body: const Value('body text'),
-        type: ItemType.note,
+        type: const Value(ItemType.note),
       ),
     );
     final item = await db.itemsDao.getItemById(id);
@@ -28,7 +28,7 @@ void main() {
 
   test('update item title', () async {
     final id = await db.itemsDao.insertItem(
-      ItemsCompanion.insert(title: 'Old', type: ItemType.note),
+      ItemsCompanion(title: const Value('Old'), type: const Value(ItemType.note)),
     );
     await db.itemsDao.updateItemTitle(id, 'New');
     final item = await db.itemsDao.getItemById(id);
@@ -37,7 +37,7 @@ void main() {
 
   test('delete item', () async {
     final id = await db.itemsDao.insertItem(
-      ItemsCompanion.insert(title: 'Del', type: ItemType.note),
+      ItemsCompanion(title: const Value('Del'), type: const Value(ItemType.note)),
     );
     await db.itemsDao.deleteItem(id);
     final item = await db.itemsDao.getItemById(id);

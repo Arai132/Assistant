@@ -16,7 +16,7 @@ enum AttachmentType { voiceMemo, image, document, video }
 
 @DataClassName('Item')
 class Items extends Table {
-  TextColumn get id => text().clientDefault(() => DateTime.now().microsecondsSinceEpoch.toString())();
+  TextColumn get id => text()();
   TextColumn get title => text()();
   TextColumn get body => text().withDefault(const Constant(''))();
   IntColumn get type => intEnum<ItemType>()();
@@ -29,7 +29,7 @@ class Items extends Table {
 
 @DataClassName('TaskRow')
 class Tasks extends Table {
-  TextColumn get id => text().references(Items, #id)();
+  TextColumn get id => text().references(Items, #id, onDelete: KeyAction.cascade)();
   IntColumn get priority => intEnum<TaskPriority>().withDefault(const Constant(1))();
   DateTimeColumn get dueDate => dateTime().nullable()();
   IntColumn get status => intEnum<TaskStatus>().withDefault(const Constant(0))();
@@ -41,8 +41,8 @@ class Tasks extends Table {
 
 @DataClassName('Attachment')
 class Attachments extends Table {
-  TextColumn get id => text().clientDefault(() => DateTime.now().microsecondsSinceEpoch.toString())();
-  TextColumn get itemId => text().references(Items, #id)();
+  TextColumn get id => text()();
+  TextColumn get itemId => text().references(Items, #id, onDelete: KeyAction.cascade)();
   IntColumn get type => intEnum<AttachmentType>()();
   TextColumn get localPath => text()();
   TextColumn get cloudUrl => text().nullable()();

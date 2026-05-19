@@ -12,9 +12,7 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      clientDefault: () => DateTime.now().microsecondsSinceEpoch.toString());
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
@@ -64,6 +62,8 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('title')) {
       context.handle(
@@ -253,14 +253,15 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     this.rowid = const Value.absent(),
   });
   ItemsCompanion.insert({
-    this.id = const Value.absent(),
+    required String id,
     required String title,
     this.body = const Value.absent(),
     required ItemType type,
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : title = Value(title),
+  })  : id = Value(id),
+        title = Value(title),
         type = Value(type);
   static Insertable<Item> custom({
     Expression<String>? id,
@@ -354,8 +355,8 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, TaskRow> {
       'id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('REFERENCES items (id)'));
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES items (id) ON DELETE CASCADE'));
   static const VerificationMeta _priorityMeta =
       const VerificationMeta('priority');
   @override
@@ -683,17 +684,15 @@ class $AttachmentsTable extends Attachments
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      clientDefault: () => DateTime.now().microsecondsSinceEpoch.toString());
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _itemIdMeta = const VerificationMeta('itemId');
   @override
   late final GeneratedColumn<String> itemId = GeneratedColumn<String>(
       'item_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('REFERENCES items (id)'));
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES items (id) ON DELETE CASCADE'));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<AttachmentType, int> type =
@@ -755,6 +754,8 @@ class $AttachmentsTable extends Attachments
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('item_id')) {
       context.handle(_itemIdMeta,
@@ -1004,7 +1005,7 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
     this.rowid = const Value.absent(),
   });
   AttachmentsCompanion.insert({
-    this.id = const Value.absent(),
+    required String id,
     required String itemId,
     required AttachmentType type,
     required String localPath,
@@ -1013,7 +1014,8 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
     this.aiDescription = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : itemId = Value(itemId),
+  })  : id = Value(id),
+        itemId = Value(itemId),
         type = Value(type),
         localPath = Value(localPath);
   static Insertable<Attachment> custom({
@@ -1130,10 +1132,29 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
       [items, tasks, attachments];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
+        [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('items',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('tasks', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('items',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('attachments', kind: UpdateKind.delete),
+            ],
+          ),
+        ],
+      );
 }
 
 typedef $$ItemsTableCreateCompanionBuilder = ItemsCompanion Function({
-  Value<String> id,
+  required String id,
   required String title,
   Value<String> body,
   required ItemType type,
@@ -1394,7 +1415,7 @@ class $$ItemsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           createCompanionCallback: ({
-            Value<String> id = const Value.absent(),
+            required String id,
             required String title,
             Value<String> body = const Value.absent(),
             required ItemType type,
@@ -1742,7 +1763,7 @@ typedef $$TasksTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function({bool id})>;
 typedef $$AttachmentsTableCreateCompanionBuilder = AttachmentsCompanion
     Function({
-  Value<String> id,
+  required String id,
   required String itemId,
   required AttachmentType type,
   required String localPath,
@@ -1984,7 +2005,7 @@ class $$AttachmentsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           createCompanionCallback: ({
-            Value<String> id = const Value.absent(),
+            required String id,
             required String itemId,
             required AttachmentType type,
             required String localPath,

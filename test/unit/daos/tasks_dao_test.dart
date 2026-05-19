@@ -13,7 +13,7 @@ void main() {
 
   Future<String> createTask(AppDatabase db, {TaskPriority priority = TaskPriority.medium}) async {
     final id = await db.itemsDao.insertItem(
-      ItemsCompanion.insert(title: 'Task', type: ItemType.task),
+      ItemsCompanion(title: const Value('Task'), type: const Value(ItemType.task)),
     );
     await db.into(db.tasks).insert(
       TasksCompanion.insert(id: id, priority: Value(priority)),
