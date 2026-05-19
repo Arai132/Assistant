@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../data/database/app_database.dart';
 import '../../providers/database_provider.dart';
+import '../shared/attachment_section.dart';
 
 class TaskDetailScreen extends ConsumerStatefulWidget {
   final String taskId;
@@ -125,8 +126,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               onEditingComplete: _saveBody,
             ),
             const Divider(height: 32),
-            // AttachmentSection will be wired in Task 8
-            const SizedBox.shrink(),
+            AttachmentSection(itemId: widget.taskId),
           ],
         ),
       ),

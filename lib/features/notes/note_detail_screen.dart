@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/database_provider.dart';
+import '../shared/attachment_section.dart';
 
 class NoteDetailScreen extends ConsumerStatefulWidget {
   final String noteId;
@@ -93,8 +94,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
               ),
             ),
             const Divider(),
-            // AttachmentSection will be wired in Task 8
-            const SizedBox.shrink(),
+            AttachmentSection(itemId: widget.noteId),
           ],
         ),
       ),
