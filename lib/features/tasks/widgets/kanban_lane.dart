@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../data/database/app_database.dart';
 import '../../../providers/database_provider.dart';
+import '../../../providers/sync_provider.dart';
 import 'task_card.dart';
 
 class KanbanLane extends ConsumerWidget {
@@ -22,6 +23,7 @@ class KanbanLane extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final syncQueue = ref.watch(syncQueueProvider);
     return Expanded(
       child: Column(
         children: [
@@ -71,6 +73,7 @@ class KanbanLane extends ConsumerWidget {
                           v == true ? TaskStatus.done : TaskStatus.todo,
                         );
                       },
+                      isPendingSync: syncQueue.hasPending(item.id),
                     ),
                   );
                 },

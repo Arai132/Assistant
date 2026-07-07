@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../data/database/app_database.dart';
 import '../../providers/database_provider.dart';
+import '../../providers/calendar_provider.dart';
 import '../shared/attachment_section.dart';
 
 class TaskDetailScreen extends ConsumerStatefulWidget {
@@ -66,6 +67,35 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
   Future<void> _delete() async {
     await ref.read(databaseProvider).itemsDao.deleteItem(widget.taskId);
     if (mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _addToCalendar() async {
+    final task = _task;
+    if (task == null) return;
+    if (task.dueDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Set a due date before adding to calendar')),
+      );
+      return;
+    }
+    final calendarService = ref.read(googleCalendarServiceProvider);
+    if (!calendarService.isSignedIn) {
+      await calendarService.signIn();
+    }
+    if (!calendarService.isSignedIn) return;
+    final title = _titleCtrl.text.trim().isEmpty ? 'Untitled task' : _titleCtrl.text.trim();
+    final eventId = await calendarService.createEvent(
+      title: title,
+      start: task.dueDate!,
+      end: task.dueDate!.add(const Duration(hours: 1)),
+    );
+    if (eventId == null) return;
+    await ref.read(databaseProvider).tasksDao.linkCalendarEvent(widget.taskId, eventId);
+    await _load();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Added to Google Calendar')),
+    );
   }
 
   @override
@@ -142,6 +172,14 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               ),
             ),
             const SizedBox(width: 8),
+            IconButton(
+              icon: Icon(
+                _task?.calendarEventId != null ? Icons.event_available : Icons.event_outlined,
+              ),
+              tooltip: _task?.calendarEventId != null ? 'Added to calendar' : 'Add to Calendar',
+              onPressed: _addToCalendar,
+            ),
+            const SizedBox(width: 4),
             IconButton(
               icon: const Icon(Icons.delete_outline, color: Colors.red),
               onPressed: _delete,

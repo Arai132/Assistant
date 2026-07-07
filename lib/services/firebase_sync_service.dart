@@ -2,20 +2,15 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../data/database/app_database.dart';
+import 'sync_queue.dart';
 
-class SyncQueue {
-  final Set<String> _pending = {};
-  void enqueue(String id) => _pending.add(id);
-  void dequeue(String id) => _pending.remove(id);
-  bool hasPending(String id) => _pending.contains(id);
-  Set<String> get all => Set.unmodifiable(_pending);
-}
+export 'sync_queue.dart';
 
 class FirebaseSyncService {
   final AppDatabase _db;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  final SyncQueue syncQueue = SyncQueue();
+  final SyncQueue syncQueue = SyncQueue.global;
 
   FirebaseSyncService(this._db);
 

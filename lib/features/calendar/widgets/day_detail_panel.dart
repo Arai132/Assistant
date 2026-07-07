@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:googleapis/calendar/v3.dart' as gcal;
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../data/database/app_database.dart';
 import '../../../providers/calendar_provider.dart';
 import '../../../providers/database_provider.dart';
@@ -11,6 +12,22 @@ import '../../../providers/database_provider.dart';
 class DayDetailPanel extends ConsumerWidget {
   final DateTime date;
   const DayDetailPanel({super.key, required this.date});
+
+  Future<void> _openEvent(BuildContext context, gcal.Event event) async {
+    final link = event.htmlLink;
+    if (link == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No calendar link available for this event')),
+      );
+      return;
+    }
+    final opened = await launchUrl(Uri.parse(link), mode: LaunchMode.externalApplication);
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open Google Calendar')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,6 +59,7 @@ class DayDetailPanel extends ConsumerWidget {
                   subtitle: e.start?.dateTime != null
                       ? Text(DateFormat.jm().format(e.start!.dateTime!.toLocal()))
                       : null,
+                  onTap: () => _openEvent(context, e),
                 )),
             ...tasks.map((r) {
               final item = r.readTable(ref.read(databaseProvider).items);

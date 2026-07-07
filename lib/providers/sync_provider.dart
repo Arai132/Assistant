@@ -5,3 +5,5 @@ import 'database_provider.dart';
 final syncServiceProvider = Provider<FirebaseSyncService>(
   (ref) => FirebaseSyncService(ref.watch(databaseProvider)),
 );
+
+final syncQueueProvider = ChangeNotifierProvider<SyncQueue>((ref) => SyncQueue.global);

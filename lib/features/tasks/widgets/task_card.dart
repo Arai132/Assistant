@@ -7,6 +7,7 @@ class TaskCard extends StatelessWidget {
   final TaskRow task;
   final VoidCallback onTap;
   final ValueChanged<bool?>? onStatusChange;
+  final bool isPendingSync;
 
   const TaskCard({
     super.key,
@@ -14,6 +15,7 @@ class TaskCard extends StatelessWidget {
     required this.task,
     required this.onTap,
     this.onStatusChange,
+    this.isPendingSync = false,
   });
 
   static final _dateFmt = DateFormat('MMM d');
@@ -53,6 +55,16 @@ class TaskCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (isPendingSync)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Icon(
+                    Icons.cloud_upload_outlined,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.outline,
+                    semanticLabel: 'Pending sync',
+                  ),
+                ),
             ],
           ),
         ),

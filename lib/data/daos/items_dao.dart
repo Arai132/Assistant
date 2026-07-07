@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 import '../database/app_database.dart';
+import '../../services/sync_queue.dart';
 
 part 'items_dao.g.dart';
 
@@ -13,6 +14,7 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
   Future<String> insertItem(ItemsCompanion entry) async {
     final id = _uuid.v4();
     await into(items).insert(entry.copyWith(id: Value(id)));
+    SyncQueue.global.enqueue(id);
     return id;
   }
 
@@ -22,16 +24,22 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
   Stream<List<Item>> watchAllNotes() =>
       (select(items)..where((t) => t.type.equals(ItemType.note.index))).watch();
 
-  Future<void> updateItemTitle(String id, String title) =>
-      (update(items)..where((t) => t.id.equals(id)))
-          .write(ItemsCompanion(title: Value(title), updatedAt: Value(DateTime.now())));
+  Future<void> updateItemTitle(String id, String title) async {
+    await (update(items)..where((t) => t.id.equals(id)))
+        .write(ItemsCompanion(title: Value(title), updatedAt: Value(DateTime.now())));
+    SyncQueue.global.enqueue(id);
+  }
 
-  Future<void> updateItemBody(String id, String body) =>
-      (update(items)..where((t) => t.id.equals(id)))
-          .write(ItemsCompanion(body: Value(body), updatedAt: Value(DateTime.now())));
+  Future<void> updateItemBody(String id, String body) async {
+    await (update(items)..where((t) => t.id.equals(id)))
+        .write(ItemsCompanion(body: Value(body), updatedAt: Value(DateTime.now())));
+    SyncQueue.global.enqueue(id);
+  }
 
-  Future<void> deleteItem(String id) =>
-      (delete(items)..where((t) => t.id.equals(id))).go();
+  Future<void> deleteItem(String id) async {
+    await (delete(items)..where((t) => t.id.equals(id))).go();
+    SyncQueue.global.dequeue(id);
+  }
 
   Future<List<Item>> searchItems(String query) =>
       (select(items)

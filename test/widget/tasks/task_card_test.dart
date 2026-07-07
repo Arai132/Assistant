@@ -45,4 +45,32 @@ void main() {
     await tester.tap(find.byType(Checkbox));
     expect(changed, isTrue);
   });
+
+  testWidgets('TaskCard shows pending-sync icon when isPendingSync is true', (tester) async {
+    final item = Item(id: '1', title: 'T', body: '', type: ItemType.task,
+        createdAt: DateTime.now(), updatedAt: DateTime.now());
+    final task = TaskRow(id: '1', priority: TaskPriority.low, dueDate: null,
+        status: TaskStatus.todo, calendarEventId: null);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: TaskCard(item: item, task: task, onTap: () {}, isPendingSync: true),
+      ),
+    ));
+
+    expect(find.byIcon(Icons.cloud_upload_outlined), findsOneWidget);
+  });
+
+  testWidgets('TaskCard hides pending-sync icon by default', (tester) async {
+    final item = Item(id: '1', title: 'T', body: '', type: ItemType.task,
+        createdAt: DateTime.now(), updatedAt: DateTime.now());
+    final task = TaskRow(id: '1', priority: TaskPriority.low, dueDate: null,
+        status: TaskStatus.todo, calendarEventId: null);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: TaskCard(item: item, task: task, onTap: () {})),
+    ));
+
+    expect(find.byIcon(Icons.cloud_upload_outlined), findsNothing);
+  });
 }

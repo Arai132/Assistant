@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/item_provider.dart';
+import '../../providers/sync_provider.dart';
 import 'widgets/note_list_tile.dart';
 
 class NotesScreen extends ConsumerStatefulWidget {
@@ -17,6 +18,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
   @override
   Widget build(BuildContext context) {
     final allNotes = ref.watch(notesProvider).valueOrNull ?? [];
+    final syncQueue = ref.watch(syncQueueProvider);
     final notes = _query.isEmpty
         ? allNotes
         : allNotes.where((n) =>
@@ -38,6 +40,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
         itemBuilder: (ctx, i) => NoteListTile(
           item: notes[i],
           onTap: () => context.push('/notes/${notes[i].id}'),
+          isPendingSync: syncQueue.hasPending(notes[i].id),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:assistant_app/data/database/app_database.dart';
+import 'package:assistant_app/services/sync_queue.dart';
 
 void main() {
   late AppDatabase db;
@@ -33,5 +34,11 @@ void main() {
     await db.tasksDao.updateTaskStatus(id, TaskStatus.done);
     final row = await (db.select(db.tasks)..where((t) => t.id.equals(id))).getSingle();
     expect(row.status, TaskStatus.done);
+  });
+
+  test('updateTaskStatus enqueues the task for sync', () async {
+    final id = await createTask(db);
+    await db.tasksDao.updateTaskStatus(id, TaskStatus.done);
+    expect(SyncQueue.global.hasPending(id), isTrue);
   });
 }

@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
+import '../../services/sync_queue.dart';
 
 class ItemRepository {
   final AppDatabase _db;
@@ -46,6 +47,7 @@ class ItemRepository {
         TasksCompanion(id: Value(id), priority: Value(priority)),
       );
     }
+    SyncQueue.global.enqueue(id);
   }
 
   Future<void> deleteItem(String id) => _db.itemsDao.deleteItem(id);

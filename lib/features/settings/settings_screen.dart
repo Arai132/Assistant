@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/calendar_provider.dart';
+import '../../providers/database_provider.dart';
 import '../../services/secure_storage_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -50,6 +51,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<void> _exportJson() async {
+    final path = await ref.read(exportServiceProvider).exportAsJson();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Exported to $path')),
+    );
+  }
+
   @override
   void dispose() {
     _apiKeyCtrl.dispose();
@@ -96,6 +105,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const ListTile(
             title: Text('Cloud Sync', style: TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text('Firebase sync — configure in Task 14'),
+          ),
+          const Divider(),
+          const ListTile(title: Text('Data Export', style: TextStyle(fontWeight: FontWeight.bold))),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: FilledButton.icon(
+              onPressed: _exportJson,
+              icon: const Icon(Icons.download),
+              label: const Text('Export as JSON'),
+            ),
           ),
         ],
       ),
