@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -14,7 +15,7 @@ void main() {
     final repo = AttachmentRepository(db);
 
     final itemId = await db.itemsDao.insertItem(
-      ItemsCompanion.insert(title: const Value('Test note'), type: const Value(ItemType.note)),
+      ItemsCompanion(title: const Value('Test note'), type: const Value(ItemType.note)),
     );
 
     // Use a test image file from assets (add a test_image.jpg to integration_test/assets/)

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../data/database/app_database.dart';
-import '../../providers/database_provider.dart';
 import 'widgets/month_grid.dart';
 import 'widgets/day_detail_panel.dart';
 

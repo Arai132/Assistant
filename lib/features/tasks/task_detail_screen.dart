@@ -100,7 +100,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
             onSelected: _setPriority,
             child: Chip(
               label: Text(priority.name.toUpperCase()),
-              backgroundColor: priorityColors[priority]!.withOpacity(0.2),
+              backgroundColor: priorityColors[priority]!.withValues(alpha: 0.2),
               labelStyle: TextStyle(color: priorityColors[priority]),
             ),
             itemBuilder: (_) => TaskPriority.values

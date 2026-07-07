@@ -28,7 +28,7 @@ class KanbanLane extends ConsumerWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 8),
-            color: color.withOpacity(0.15),
+            color: color.withValues(alpha: 0.15),
             child: Text(
               label,
               textAlign: TextAlign.center,
