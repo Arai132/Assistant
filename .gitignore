@@ -1,2 +1,9 @@
 .claude/
 CLAUDE.md
+.superpowers/
+
+# secrets
+.env
+.env.*
+*.pem
+*.key
